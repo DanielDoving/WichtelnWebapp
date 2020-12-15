@@ -1,0 +1,42 @@
+﻿@page "/wishlist"
+@using WichtelnWebapp.Shared
+@inject HttpClient http
+
+<h3>My Wishlist</h3>
+@if (wishlist == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Description </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var wish in wishlist)
+            {
+                <tr>
+                    <td>@wish.ITEM</td>
+                    <td>@wish.DESCRIPTION</td>
+                    <td><input type="checkbox"/></td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<WishModel> wishlist;
+    protected override async Task OnInitializedAsync()
+    {
+        //wishlist = await Http.GetFromJsonAsync<WishList[]>("WeatherForecast");
+        wishlist = await http.GetFromJsonAsync<List<WishModel>>("GetWishList");
+    }
+}
