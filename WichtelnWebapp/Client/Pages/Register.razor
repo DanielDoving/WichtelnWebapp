@@ -2,6 +2,9 @@
 @layout LoginLayout
 @using WichtelnWebapp.Shared
 @inject NavigationManager NavigationManager
+@inject HttpClient http
+@using System.Net.Http
+
 <div class="card">
     <div class="card-body">
         <h3 class="card-title">Register</h3>
@@ -9,6 +12,7 @@
             <EditForm Model="@accountModel" OnValidSubmit="@HandleValidSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
+                <p>@status</p>
                 <div class="form-group">
                     <label for="email">E-Mail</label>
                     <InputText class="form-control" @bind-Value="accountModel.EMAIL" />
@@ -42,10 +46,12 @@
 
 @code {
     private AccountModel accountModel = new AccountModel();
+    String status;
 
-    private void HandleValidSubmit()
+    private async void HandleValidSubmit()
     {
-        NavigationManager.NavigateTo("/home");
+        var request = await http.PostAsJsonAsync<AccountModel>("RegisterUser", accountModel);
+        status = request.StatusCode.ToString();
     }
 
     private void handleCancel()
