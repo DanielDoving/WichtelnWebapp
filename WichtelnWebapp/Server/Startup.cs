@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System;
+using Blazored.SessionStorage;
 
 namespace WichtelnWebapp.Server
 {
@@ -24,8 +26,20 @@ namespace WichtelnWebapp.Server
         {
             services.AddMvc();
             string conStr = this.Configuration.GetConnectionString("DefaultConnection");
+            services.AddScoped<ISqlController, SqlController>();
             services.AddControllersWithViews();
-            services.AddRazorPages();           
+            services.AddRazorPages();
+
+
+            services.AddBlazoredSessionStorage();
+
+            services.AddDistributedMemoryCache();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,8 +60,10 @@ namespace WichtelnWebapp.Server
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
-
+            
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

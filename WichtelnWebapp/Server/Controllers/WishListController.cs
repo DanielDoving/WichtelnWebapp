@@ -9,11 +9,11 @@ using WichtelnWebapp.Shared;
 namespace WichtelnWebapp.Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WishListController : ControllerBase
     {
-        private readonly SqlController _db;
-        public WishListController(SqlController db)
+        private readonly ISqlController _db;
+        public WishListController(ISqlController db)
         {
             _db = db;
         }
@@ -29,15 +29,14 @@ namespace WichtelnWebapp.Server.Controllers
             return wishlist;
         }
 
-        [HttpGet("{id}")]
-        public List<WishModel> GetWishesAsync(int id)
+        [HttpGet("GetByID/{id}")]
+        public Task<List<WishModel>> GetByID(int id)
         {
             string sql = @"SELECT WISH_ID, ITEM_TITLE, ITEM_DESCRIPTION, GRANTED FROM Wish 
                             JOIN List on Wish.FK_LIST_ID = List.LIST_ID
                             JOIN Account on Account.ACCOUNT_ID = List.FK_ACCOUNT_ID
-                            WHERE Account.ACCOUNT_ID = @id;";
-            //return _db.LoadData(sql, id);
-            return null;
+                            WHERE Account.ACCOUNT_ID = @ACCOUNT_ID;";
+            return _db.LoadData<WishModel, dynamic>(sql, new { ACCOUNT_ID = id });
 
         }
     }

@@ -1,6 +1,7 @@
 ﻿@page "/wishlist"
 @using WichtelnWebapp.Shared
 @inject HttpClient http
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <h3>My Wishlist</h3>
 <p>Your wishlist is shown here</p>
@@ -24,7 +25,7 @@ else
                 <tr>
                     <td>@wish.ITEM</td>
                     <td>@wish.DESCRIPTION</td>
-                    <td><input type="checkbox"/></td>
+                    <td><input type="checkbox" /></td>
 
                 </tr>
             }
@@ -34,10 +35,11 @@ else
 
 
 @code {
+
     private List<WishModel> wishlist;
     protected override async Task OnInitializedAsync()
     {
-        //wishlist = await Http.GetFromJsonAsync<WishList[]>("WeatherForecast");
-        wishlist = await http.GetFromJsonAsync<List<WishModel>>("GetWishList");
+        int id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
+        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/GetWishList/" + id);
     }
 }

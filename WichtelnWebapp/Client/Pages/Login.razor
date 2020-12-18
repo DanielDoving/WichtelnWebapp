@@ -2,39 +2,53 @@
 @layout LoginLayout
 @using WichtelnWebapp.Shared
 @inject NavigationManager NavigationManager
-    <div class="card">
-        <div class="card-body">
-            <h3 class="card-title">Login</h3>
-            <div class="d-flex justify-content-center">
-                <EditForm Model="@accountModel" OnValidSubmit="@HandleValidSubmit">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-                    <div class="form-group">
-                        <label for="email">E-Mail</label>
-                        <InputText class="form-control" @bind-Value="accountModel.EMAIL" />
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <InputText class="form-control" @bind-Value="accountModel.PASSWORD" />
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                    <a href="/register" class="col-3">Register</a>
-                </EditForm>
-            </div>
+@inject HttpClient http
+@using System.Net.Http
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Login</h3>
+        <div class="d-flex justify-content-center">
+            <EditForm Model="@auth" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group">
+                    <label for="email">E-Mail</label>
+                    <InputText class="form-control" @bind-Value="auth.EMAIL" />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <InputText class="form-control" @bind-Value="auth.PASSWORD" />
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="/register" class="col-3">Register</a>
+            </EditForm>
         </div>
     </div>
+</div>
 
-    @code {
-        private AccountModel accountModel = new AccountModel();
+@code {
+    private AuthenticationModel auth = new AuthenticationModel();
 
-        private void HandleValidSubmit()
+    private async void HandleValidSubmit()
+    {
+        string request = "api/Account/Authenticate/" + auth.EMAIL + "/" + auth.PASSWORD;
+        var response = await http.GetFromJsonAsync<AccountModel>(request);
+        if (response.EMAIL != null)
         {
+            await sessionStorage.SetItemAsync("ACCOUNT_ID", response.ACCOUNT_ID);
+            await sessionStorage.SetItemAsync("EMAIL", response.EMAIL);
+            await sessionStorage.SetItemAsync("USERNAME", response.USERNAME);
+            await sessionStorage.SetItemAsync("NAME", response.NAME);
+            await sessionStorage.SetItemAsync("SURNAME", response.SURNAME);
             NavigationManager.NavigateTo("/home");
         }
-
-        private void HandleRegister()
-        {
-            NavigationManager.NavigateTo("/register");
-        }
-
     }
+
+    private void HandleRegister()
+    {
+        NavigationManager.NavigateTo("/register");
+    }
+
+}

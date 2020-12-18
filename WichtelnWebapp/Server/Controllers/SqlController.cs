@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 
-namespace WichtelnWebapp.Shared
+namespace WichtelnWebapp.Server
 {
-    public class SqlController
+    public class SqlController : ISqlController
     {
         private readonly IConfiguration _config;
 
@@ -24,7 +23,7 @@ namespace WichtelnWebapp.Shared
         public async Task<List<T>> LoadData<T, U>(string sql, U parameters)
         {
             string conStr = _config.GetConnectionString(conStr_name);
-            using(IDbConnection connection = new SqlConnection(conStr))
+            using (IDbConnection connection = new SqlConnection(conStr))
             {
                 var data = await connection.QueryAsync<T>(sql, parameters);
                 return data.ToList();
@@ -34,7 +33,7 @@ namespace WichtelnWebapp.Shared
         // Update, Delete, Insert to DB
         public async Task SaveData<T>(string sql, T parameters)
         {
-            string conStr = _config.GetConnectionString(conStr_name); 
+            string conStr = _config.GetConnectionString(conStr_name);
             using (IDbConnection connection = new SqlConnection(conStr))
             {
                 await connection.ExecuteAsync(sql, parameters);

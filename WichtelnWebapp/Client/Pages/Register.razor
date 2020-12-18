@@ -33,10 +33,6 @@
                     <label for="password">Password</label>
                     <InputText type="password" class="form-control" @bind-Value="accountModel.PASSWORD" />
                 </div>
-                <div class="form-group">
-                    <label for="confirm-password">Confirm Password</label>
-                    <InputText type="password" class="form-control" @bind-Value="accountModel.PASSWORD" />
-                </div>
                 <button type="submit" class="btn btn-primary">Create Account</button>
                 <a href="/" class="col-3">Cancel</a>
             </EditForm>
@@ -50,7 +46,11 @@
 
     private async void HandleValidSubmit()
     {
-        var request = await http.PostAsJsonAsync<AccountModel>("RegisterUser", accountModel);
+        var request = await http.PostAsJsonAsync<AccountModel>("api/Account/AddAccount", accountModel);
+        if (request.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/");
+        }
         status = request.StatusCode.ToString();
     }
 

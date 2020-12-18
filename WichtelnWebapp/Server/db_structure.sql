@@ -1,4 +1,5 @@
-﻿--
+﻿DROP TABLE Comment, Wish, List, Account;
+--
 -- Table structure User
 --
 create table Account(
@@ -7,7 +8,7 @@ create table Account(
 	"USERNAME"		varchar(20),
 	"NAME"			varchar(20),
 	"SURNAME"		varchar(20),
-	"PASSWORD"		varchar(50)
+	"PASSWORD"		varchar(256)
 	primary key (ACCOUNT_ID)
 );
 

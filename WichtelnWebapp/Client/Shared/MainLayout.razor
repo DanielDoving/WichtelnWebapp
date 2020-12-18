@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager NavigationManager
+
 
 <div class="page">
     <div class="sidebar">
@@ -7,7 +10,7 @@
 
     <div class="main">
         <div class="top-row px-4">
-            <a href="#" target="_blank" class="ml-md-auto">Logout</a>
+            <a href="#" class="ml-md-auto" @onclick="logout">Logout</a>
         </div>
 
         <div class="content px-4">
@@ -17,5 +20,20 @@
 </div>
 
 @code{
+    protected override async Task OnInitializedAsync()
+    {
+        int ACCOUNT_ID = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
+
+        if(ACCOUNT_ID == 0)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    public void logout()
+    {
+        sessionStorage.ClearAsync();
+        NavigationManager.NavigateTo("/");
+    }
 
 }
