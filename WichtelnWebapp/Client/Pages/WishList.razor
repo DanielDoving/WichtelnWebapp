@@ -4,7 +4,6 @@
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <h3>My Wishlist</h3>
-<p>Your wishlist is shown here</p>
 @if (wishlist == null)
 {
     <p><em>Loading...</em></p>
@@ -20,26 +19,53 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var wish in wishlist)
+            @if (wishlist.Count != 0)
             {
-                <tr>
-                    <td>@wish.ITEM</td>
-                    <td>@wish.DESCRIPTION</td>
-                    <td><input type="checkbox" /></td>
 
-                </tr>
+                @foreach (var wish in wishlist)
+                {
+                    <tr>
+                        <td>@wish.ITEM_TITLE</td>
+                        <td>@wish.ITEM_DESCRIPTION</td>
+                        <td>
+                            <button type="button" class="btn btn-danger" @onclick="@(()=> deleteWish(wish.WISH_ID))">
+                                <span class="oi oi-trash"></span>
+                            </button>
+                        </td>
+
+                    </tr>
+                }
             }
+            else
+            {
+                <p>No Wishes added yet</p>
+            }
+
         </tbody>
     </table>
+
+    <button type="button" class="btn btn-primary btn-lg" @onclick()>
+        <span class="oi oi-plus"></span>
+    </button>
 }
 
 
 @code {
+    [Parameter]
+    public int id { get; set; }
 
     private List<WishModel> wishlist;
+
+
     protected override async Task OnInitializedAsync()
     {
-        int id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
-        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/GetWishList/" + id);
+        id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
+        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetByID/" + id);
+    }
+
+    async Task deleteWish(int wish_id)
+    {
+        await http.DeleteAsync("api/WishList/Delete/" + wish_id);
+        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetByID/" + id);
     }
 }

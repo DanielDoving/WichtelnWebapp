@@ -1,4 +1,4 @@
-﻿DROP TABLE Comment, Wish, List, Account;
+﻿DROP TABLE Comment, Wish, Account;
 --
 -- Table structure User
 --
@@ -13,25 +13,16 @@ create table Account(
 );
 
 --
--- Table structure List
---
-create table List(
-	"LIST_ID"		int identity(1,1),
-	"FK_ACCOUNT_ID"	int foreign key 
-					references Account(ACCOUNT_ID),
-	primary key (LIST_ID)
-);
-
---
 -- Table structure Wish
 --
 create table Wish(
 	"WISH_ID"		int identity(1,1),
-	"FK_LIST_ID"	int foreign key 
-					references List(LIST_ID),
+	"FK_ACCOUNT_ID"	int foreign key 
+					references Account(ACCOUNT_ID),
 	"ITEM_TITLE"	varchar(256),
 	"ITEM_DESCRIPTION"	text,
 	"GRANTED"		bit default 0,
+	"TIMESTAMP"		datetime DEFAULT(GETDATE()),
 	primary key (WISH_ID)
 );
 
@@ -40,8 +31,8 @@ create table Wish(
 --
 create table Comment(
 	"COMMENT_ID"	int identity(1,1),
-	"FK_LIST_ID"	int foreign key 
-					references List(LIST_ID),
+	"FK_COMMENTER_ID"	int foreign key 
+					references Account(ACCOUNT_ID),
 	"FK_ACCOUNT_ID"	int foreign key 
 					references Account(ACCOUNT_ID),
 	"COMMENT"		text

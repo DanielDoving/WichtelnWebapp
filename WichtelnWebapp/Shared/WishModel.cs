@@ -9,7 +9,8 @@ namespace WichtelnWebapp.Shared
     public class WishModel
     {
         public int WISH_ID { get; set; }
-        public String ITEM { get; set; }
-        public String DESCRIPTION { get; set; }
+        public String ITEM_TITLE { get; set; }
+        public String ITEM_DESCRIPTION { get; set; }
+        public Boolean GRANTED { get; set; }
     }
 }
