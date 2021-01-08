@@ -1,4 +1,4 @@
-﻿DROP TABLE Comment, Wish, Account;
+﻿-- DROP TABLE Comment, Wish, Account;
 --
 -- Table structure User
 --

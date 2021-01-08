@@ -1,0 +1,33 @@
+﻿@page "/addwish"
+@using WichtelnWebapp.Shared 
+<h3>Add Wish</h3>
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Login</h3>
+        <div class="d-flex justify-content-center">
+            <EditForm Model="@wish" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <InputText class="form-control" @bind-Value="wish.ITEM_TITLE" />
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <InputTextArea class="form-control" @bind-Value="wish.ITEM_DESCRIPTION" />
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="/wishlist" class="col-3">Cancel</a>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    WishModel wish = new WishModel();
+    void HandleValidSubmit()
+    {
+
+    }
+}
+

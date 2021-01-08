@@ -2,6 +2,8 @@
 @using WichtelnWebapp.Shared
 @inject HttpClient http
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager NavigationManager
+
 
 <h3>My Wishlist</h3>
 @if (wishlist == null)
@@ -44,7 +46,7 @@ else
         </tbody>
     </table>
 
-    <button type="button" class="btn btn-primary btn-lg" @onclick()>
+    <button type="button" class="btn btn-primary btn-lg" @onclick="@addwish">
         <span class="oi oi-plus"></span>
     </button>
 }
@@ -68,4 +70,11 @@ else
         await http.DeleteAsync("api/WishList/Delete/" + wish_id);
         wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetByID/" + id);
     }
+
+    void addwish()
+    {
+        NavigationManager.NavigateTo("/addwish");
+    }
+
+
 }
