@@ -1,9 +1,131 @@
 ﻿@page "/home"
 @layout MainLayout
+@using WichtelnWebapp.Shared
+@inject NavigationManager NavigationManager
+@inject HttpClient http
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <h3>Home</h3>
-<p>Other people's lists go here</p>
+@if (wishlists.Count != 0)
+{
+    <div class="accordion" id="accordion">
+        @foreach (var wishlist in wishlists)
+        {
+            <div class="card">
+                <div class="card-header" id="heading-@wishlist.ACCOUNT_ID">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapse-@wishlist.ACCOUNT_ID" aria-expanded="false" aria-controls="collapse-@wishlist.ACCOUNT_ID" @onclick="@(()=> getWishes(wishlist.ACCOUNT_ID))">
+                            @wishlist.USERNAME's Wishlist
+                        </button>
+                    </h5>
+                </div>
 
+                <div id="collapse-@wishlist.ACCOUNT_ID" class="collapse" aria-labelledby="heading-@wishlist.ACCOUNT_ID" data-parent="#accordion">
+                    <div class="card-body">
+
+                        @if (wishes.Count != 0)
+                        {
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Description </th>
+                                        <th>Granted</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    @foreach (var wish in wishes)
+                                    {
+                                        <tr>
+                                            <td>@wish.ITEM_TITLE</td>
+                                            <td>@wish.ITEM_DESCRIPTION</td>
+                                            <td>
+                                                @if (wish.GRANTED == false)
+                                                {
+                                                    <button type="button" class="btn btn-primary" @onclick="@(()=> grantWish(id, wish))">Grant Wish</button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-success" disabled>Granted by @wish.GRANTED_BY</button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <h5>Comments</h5>
+                            @foreach (var comm in comments)
+                            {
+                    <p><strong>@comm.COMMENTER</strong> <small>at @comm.TIMESTAMP</small></p>
+                                <p>@comm.COMMENT</p>
+                            }
+
+
+                            <EditForm Model="@comment" OnValidSubmit="@HandleValidSubmit">
+                                <InputTextArea class="form-control" @bind-Value="comment.COMMENT" />
+                                <br />
+                                <button type="submit" class="btn btn-primary">Post Comment</button>
+                            </EditForm>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+}
+else
+{
+    <p>No Wishlists</p>
+}
 @code {
-    
+    [Parameter]
+    public int id { get; set; }
+    public int user_id { get; set; }
+    public List<AccountModel> wishlists = new List<AccountModel>();
+    public List<WishModel> wishes = new List<WishModel>();
+    public List<CommentModel> comments = new List<CommentModel>();
+    public CommentModel comment = new CommentModel();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
+        wishlists = await http.GetFromJsonAsync<List<AccountModel>>("api/WishList/GetAllBut/" + id);
+    }
+
+    private async void HandleValidSubmit()
+    {
+        AccountModel acc = await http.GetFromJsonAsync<AccountModel>("api/Account/GetByID/" + id);
+        comment.COMMENTER = acc.USERNAME;
+        var request = await http.PostAsJsonAsync<CommentModel>("api/WishList/AddComment/" + user_id, comment);
+        if (request.IsSuccessStatusCode)
+        {
+            getWishes(user_id);
+        }
+
+    }
+
+
+    async Task getWishes(int uid)
+    {
+        wishes = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetAllByID/" + uid);
+        comments = await http.GetFromJsonAsync<List<CommentModel>>("api/WishList/GetCommentByID/" + uid);
+        user_id = uid;
+        StateHasChanged();
+    }
+
+    async Task grantWish(int id, WishModel wish)
+    {
+        var request = await http.PostAsJsonAsync<WishModel>("api/WishList/GrantWish/" + id, wish);
+        if (request.IsSuccessStatusCode)
+        {
+            wish.GRANTED = true;
+            AccountModel acc = await http.GetFromJsonAsync<AccountModel>("api/Account/GetByID/" + id);
+            wish.GRANTED_BY = acc.USERNAME;
+            StateHasChanged();
+        }
+    }
+
 }

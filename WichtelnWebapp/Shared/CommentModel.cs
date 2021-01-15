@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 
 namespace WichtelnWebapp.Shared
 {
-    public class AuthenticationModel
+    public class CommentModel
     {
         [Required]
-        public string EMAIL { get; set; }
+        public string COMMENT { get; set; }
+
         [Required]
-        public string PASSWORD { get; set; }
+        public string COMMENTER { get; set; }
+
+        public string TIMESTAMP { get; set; }
+
     }
 }

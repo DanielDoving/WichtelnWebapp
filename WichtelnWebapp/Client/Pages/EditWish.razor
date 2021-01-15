@@ -1,13 +1,15 @@
-﻿@page "/addwish"
+﻿@page "/editwish"
 @using WichtelnWebapp.Shared
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @inject NavigationManager NavigationManager
 @inject HttpClient http
+@using Microsoft.AspNetCore.WebUtilities;
+@using Microsoft.Extensions.Primitives;
 @using System.Net.Http
 
 <div class="card">
     <div class="card-body">
-        <h3 class="card-title">Add Wish</h3>
+        <h3 class="card-title">Edit Wish</h3>
         <div class="d-flex justify-content-center">
             <EditForm Model="@wish" OnValidSubmit="@HandleValidSubmit">
                 <DataAnnotationsValidator />
@@ -29,24 +31,35 @@
 
 @code {
     [Parameter]
-    public int id { get; set; }
+    public int user_id { get; set; }
 
-    WishModel wish = new WishModel();
+    [Parameter]
+    public int wish_id { get; set; }
+
+    private WishModel wish = new WishModel();
 
 
     protected override async Task OnInitializedAsync()
     {
-        id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("id", out var init_id))
+        {
+            wish_id = Convert.ToInt32(init_id);
+        }
+        user_id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
+        wish = await http.GetFromJsonAsync<WishModel>("api/WishList/GetByID/" + wish_id);
     }
 
     private async void HandleValidSubmit()
     {
-        var request = await http.PostAsJsonAsync<WishModel>("api/WishList/AddWish/" + id, wish);
+        var request = await http.PostAsJsonAsync<WishModel>("api/WishList/EditWish/" + wish_id, wish);
         if (request.IsSuccessStatusCode)
         {
             NavigationManager.NavigateTo("/wishlist");
         }
-
     }
+
+
+
 }
 

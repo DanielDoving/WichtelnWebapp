@@ -26,29 +26,57 @@ else
 
                 @foreach (var wish in wishlist)
                 {
-                    <tr>
-                        <td>@wish.ITEM_TITLE</td>
-                        <td>@wish.ITEM_DESCRIPTION</td>
-                        <td>
-                            <button type="button" class="btn btn-danger" @onclick="@(()=> deleteWish(wish.WISH_ID))">
-                                <span class="oi oi-trash"></span>
-                            </button>
-                        </td>
-
-                    </tr>
+                    if (wish.GRANTED == false)
+                    {
+                        <tr>
+                            <td>@wish.ITEM_TITLE</td>
+                            <td>@wish.ITEM_DESCRIPTION</td>
+                            <td>
+                                <button type="button" class="btn btn-danger" @onclick="@(()=> deleteWish(wish.WISH_ID))">
+                                    <span class="oi oi-trash"></span>
+                                </button>
+                                <button type="button" class="btn btn-primary" @onclick="@(()=> editWish(wish.WISH_ID))">
+                                    <span class="oi oi-pencil"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
                 }
             }
             else
             {
                 <p>No Wishes added yet</p>
             }
-
         </tbody>
     </table>
-
     <button type="button" class="btn btn-primary btn-lg" @onclick="@addwish">
         <span class="oi oi-plus"></span>
     </button>
+    <br />
+    <br />
+    <h4>Granted Wishes</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Description </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var wish in wishlist)
+            {
+                if (wish.GRANTED == true)
+                {
+                    <tr>
+                        <td>@wish.ITEM_TITLE</td>
+                        <td>@wish.ITEM_DESCRIPTION</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+
 }
 
 
@@ -62,13 +90,18 @@ else
     protected override async Task OnInitializedAsync()
     {
         id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
-        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetByID/" + id);
+        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetAllByID/" + id);
     }
 
     async Task deleteWish(int wish_id)
     {
         await http.DeleteAsync("api/WishList/Delete/" + wish_id);
-        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetByID/" + id);
+        wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetAllByID/" + id);
+    }
+
+    void editWish(int id)
+    {
+        NavigationManager.NavigateTo("/editwish?id=" + id);
     }
 
     void addwish()

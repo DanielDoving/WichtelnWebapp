@@ -9,6 +9,7 @@
 <div class="card">
     <div class="card-body">
         <h3 class="card-title">Login</h3>
+        <p class="text-danger">@status</p>
         <div class="d-flex justify-content-center">
             <EditForm Model="@auth" OnValidSubmit="@HandleValidSubmit">
                 <DataAnnotationsValidator />
@@ -19,7 +20,7 @@
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <InputText class="form-control" @bind-Value="auth.PASSWORD" />
+                    <InputText type="password" class="form-control" @bind-Value="auth.PASSWORD" />
                 </div>
                 <button type="submit" class="btn btn-primary">Login</button>
                 <a href="/register" class="col-3">Register</a>
@@ -30,6 +31,7 @@
 
 @code {
     private AuthenticationModel auth = new AuthenticationModel();
+    String status;
 
     private async void HandleValidSubmit()
     {
@@ -44,7 +46,13 @@
             await sessionStorage.SetItemAsync("SURNAME", response.SURNAME);
             NavigationManager.NavigateTo("/home");
         }
+        else
+        {
+            status = "Incorrect Login";
+            StateHasChanged();
+        }
     }
+
 
     private void HandleRegister()
     {

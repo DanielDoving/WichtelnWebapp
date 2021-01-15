@@ -36,7 +36,7 @@ namespace WichtelnWebapp.Server.Controllers
         }
 
         // Get all users
-        // GET: api/Accounts/GetAll
+        // GET: api/Account/GetAll
         [HttpGet("GetAll")]
         public Task<List<AccountModel>> GetAll()
         {
@@ -46,22 +46,24 @@ namespace WichtelnWebapp.Server.Controllers
         }
 
         // Get User by ID
-        // GET: api/Accounts/GetByID/{id}
+        // GET: api/Account/GetByID/{id}
         [HttpGet("GetByID/{id}")]
-        public Task<List<AccountModel>> GetByID(int id)
+        public async Task<AccountModel> GetByID(int id)
         {
             string sql = "select * from Account where ACCOUNT_ID=@ACCOUNT_ID";
-            return _db.LoadData<AccountModel, dynamic>(sql, new {ACCOUNT_ID = id});
+            var user_query = await _db.LoadData<AccountModel, dynamic>(sql, new {ACCOUNT_ID = id});
+            AccountModel account = user_query.FirstOrDefault();
+            return account;
         }
 
 
         // Authenticate User
-        // GET: api/Accounts/Authenticate
+        // GET: api/Account/Authenticate
         [HttpGet("Authenticate/{EMAIL}/{PASSWORD}")]
         public async Task<AccountModel> Authenticate(string EMAIL, string PASSWORD)
         {
             if (string.IsNullOrEmpty(EMAIL) || string.IsNullOrEmpty(PASSWORD))
-                return null;
+                return new AccountModel();
 
 
             string sql = "select * from Account where EMAIL=@EMAIL";
@@ -71,18 +73,33 @@ namespace WichtelnWebapp.Server.Controllers
             if(query != null)
             {
                 AccountModel account = query.FirstOrDefault();
+                if(account == null)
+                {
+                    return new AccountModel();
+                }
+
                 if(VerifyHashedPassword(account.PASSWORD, PASSWORD))
                 {
                     return account;
                 }
             }
-            return null;
+            return new AccountModel();
 
         }
 
-                
-
-
+        // Edit account by id
+        // POST: api/Account/EditAccount/{id}
+        [HttpPost("EditAccount/{id}")]
+        public async Task EditWish(int id, AccountModel account)
+        {
+            string sqlCommand = @"UPDATE Account
+                                  SET EMAIL = @EMAIL,
+                                  USERNAME = @USERNAME,
+                                  NAME = @NAME,
+                                  SURNAME = @SURNAME
+                                  WHERE ACCOUNT_ID=@ACCOUNT_ID;";
+            await _db.SaveData(sqlCommand, new { ACCOUNT_ID = id, EMAIL = account.EMAIL, USERNAME = account.USERNAME, NAME = account.NAME, SURNAME = account.SURNAME});
+        }
 
         private string HashPassword(string password)
         {

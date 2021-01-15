@@ -1,4 +1,4 @@
-﻿-- DROP TABLE Comment, Wish, Account;
+﻿DROP TABLE Comment, Wish, Account;
 --
 -- Table structure User
 --
@@ -22,6 +22,7 @@ create table Wish(
 	"ITEM_TITLE"	varchar(256),
 	"ITEM_DESCRIPTION"	text,
 	"GRANTED"		bit default 0,
+	"GRANTED_BY"	varchar(20),
 	"TIMESTAMP"		datetime DEFAULT(GETDATE()),
 	primary key (WISH_ID)
 );
@@ -31,10 +32,10 @@ create table Wish(
 --
 create table Comment(
 	"COMMENT_ID"	int identity(1,1),
-	"FK_COMMENTER_ID"	int foreign key 
-					references Account(ACCOUNT_ID),
+	"COMMENTER"		varchar(20),
 	"FK_ACCOUNT_ID"	int foreign key 
 					references Account(ACCOUNT_ID),
-	"COMMENT"		text
+	"COMMENT"		text,
+	"TIMESTAMP"		datetime DEFAULT(GETDATE())
 	primary key (COMMENT_ID)
 );

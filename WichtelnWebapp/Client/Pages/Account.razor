@@ -1,8 +1,62 @@
 ﻿@page "/account"
+@using WichtelnWebapp.Shared
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject NavigationManager NavigationManager
+@inject HttpClient http
+@using System.Net.Http
 
-<h3>Account</h3>
-<p>Edit account data here</p>
+<h3>Edit Account</h3>
+<p class="text-primary">@status</p>
+
+<div class="d-flex justify-content-center">
+    <EditForm Model="@accountModel" OnValidSubmit="@HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="email">E-Mail</label>
+            <InputText class="form-control" @bind-Value="accountModel.EMAIL" />
+        </div>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <InputText class="form-control" @bind-Value="accountModel.USERNAME" />
+        </div>
+        <div class="form-group">
+            <label for="name">Name</label>
+            <InputText class="form-control" @bind-Value="accountModel.NAME" />
+        </div>
+        <div class="form-group">
+            <label for="surname">Surname</label>
+            <InputText class="form-control" @bind-Value="accountModel.SURNAME" />
+        </div>
+        <button type="submit" class="btn btn-primary">Update Account</button>
+    </EditForm>
+</div>
+
 
 @code {
+    [Parameter]
+    public int user_id { get; set; }
+    private AccountModel accountModel = new AccountModel();
+    String status;
 
+    protected override async Task OnInitializedAsync()
+    {
+        user_id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
+        accountModel = await http.GetFromJsonAsync<AccountModel>("api/Account/GetByID/" + user_id);
+    }
+
+
+    private async void HandleValidSubmit()
+    {
+        var request = await http.PostAsJsonAsync<AccountModel>("api/Account/EditAccount/" + user_id, accountModel);
+        if (request.IsSuccessStatusCode)
+        {
+            status = "Successfully updated account";
+        }
+        else
+        {
+            status = "An error occurred";
+        }
+        StateHasChanged();
+    }
 }

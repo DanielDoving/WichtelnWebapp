@@ -12,24 +12,28 @@ namespace WichtelnWebapp.Shared
         public int ACCOUNT_ID { get; set; }
 
 
-        //[Required]
-        //[StringLength(50, ErrorMessage = "E-Mail too long")]
+        [Required]
+        [MinLength(5, ErrorMessage = "E-Mail too short (min. 5 Characters)")]
+        [StringLength(50, ErrorMessage = "E-Mail too long")]
+        [EmailAddress]
         public string EMAIL { get; set; }
 
-        //[Required]
-        //[StringLength(20, ErrorMessage = "Username too long")]
+        [Required]
+        [MinLength(3, ErrorMessage = "Username too short (min. 3 Characters)")]
+        [StringLength(20, ErrorMessage = "Username too long")]
         public string USERNAME { get; set; }
 
-        //[Required]
-        //[StringLength(20, ErrorMessage = "Name too long")]
+        [Required]
+        [MinLength(3, ErrorMessage = "Name too short (min. 3 Characters)")]
+        [StringLength(20, ErrorMessage = "Name too long")]
         public string NAME { get; set; }
 
-        //[Required]
-        //[StringLength(20, ErrorMessage = "Surname too long")]
+        [Required]
+        [MinLength(3, ErrorMessage = "Surname too short (min. 3 Characters)")]
+        [StringLength(20, ErrorMessage = "Surname too long")]
         public string SURNAME { get; set; }
 
-        //[Required]
-        //[StringLength(50, ErrorMessage = "Password too long")]
+        [MinLength(5, ErrorMessage = "Password too short (min. 5 Characters)")]
         public string PASSWORD { get; set; }
 
     }
