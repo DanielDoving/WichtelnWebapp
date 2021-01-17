@@ -75,6 +75,12 @@ else
             }
         </tbody>
     </table>
+    <h4>Comments</h4>
+    @foreach (var comm in comments)
+    {
+        <p><strong>@comm.COMMENTER</strong><small> at @comm.TIMESTAMP</small></p>
+        <p>@comm.COMMENT</p>
+    }
 
 
 }
@@ -83,7 +89,7 @@ else
 @code {
     [Parameter]
     public int id { get; set; }
-
+    public List<CommentModel> comments = new List<CommentModel>();
     private List<WishModel> wishlist;
 
 
@@ -91,6 +97,7 @@ else
     {
         id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
         wishlist = await http.GetFromJsonAsync<List<WishModel>>("api/WishList/GetAllByID/" + id);
+        comments = await http.GetFromJsonAsync<List<CommentModel>>("api/WishList/GetCommentByID/" + id);
     }
 
     async Task deleteWish(int wish_id)

@@ -9,7 +9,7 @@ namespace WichtelnWebapp.Shared
 {
     public class CommentModel
     {
-        [Required]
+        [Required(ErrorMessage = "Comment is Required")]
         public string COMMENT { get; set; }
 
         [Required]

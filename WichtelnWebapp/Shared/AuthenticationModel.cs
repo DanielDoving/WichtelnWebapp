@@ -9,9 +9,9 @@ namespace WichtelnWebapp.Shared
 {
     public class AuthenticationModel
     {
-        [Required]
+        [Required(ErrorMessage = "Email/Username is Required")]
         public string EMAIL { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Password is Required")]
         public string PASSWORD { get; set; }
     }
 }

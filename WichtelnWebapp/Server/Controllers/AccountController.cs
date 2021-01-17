@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using WichtelnWebapp.Shared;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Net;
 
 namespace WichtelnWebapp.Server.Controllers
 {
@@ -29,6 +30,17 @@ namespace WichtelnWebapp.Server.Controllers
         [HttpPost("AddAccount")]
         public async Task Create(AccountModel account)
         {
+            string sql = "select * from Account where EMAIL=@EMAIL OR USERNAME=@USERNAME;";
+
+            var query = await _db.LoadData<AccountModel, dynamic>(sql, new { EMAIL = account.EMAIL, USERNAME = account.USERNAME });
+            
+            if(query.Count != 0)
+            {
+                throw new Exception();
+                return;
+            }
+
+
             account.PASSWORD = HashPassword(account.PASSWORD);
             string sqlCommand = @"INSERT INTO Account(EMAIL, USERNAME, NAME, SURNAME, PASSWORD)
                                           VALUES(@EMAIL, @USERNAME, @NAME, @SURNAME, @PASSWORD);";
@@ -66,7 +78,7 @@ namespace WichtelnWebapp.Server.Controllers
                 return new AccountModel();
 
 
-            string sql = "select * from Account where EMAIL=@EMAIL";
+            string sql = "select * from Account where EMAIL=@EMAIL OR USERNAME=@EMAIL;";
 
             var query = await _db.LoadData<AccountModel, dynamic>(sql, new { EMAIL});
            
@@ -90,8 +102,9 @@ namespace WichtelnWebapp.Server.Controllers
         // Edit account by id
         // POST: api/Account/EditAccount/{id}
         [HttpPost("EditAccount/{id}")]
-        public async Task EditWish(int id, AccountModel account)
+        public async Task EditAccount(int id, AccountModel account)
         {
+            
             string sqlCommand = @"UPDATE Account
                                   SET EMAIL = @EMAIL,
                                   USERNAME = @USERNAME,
@@ -101,13 +114,25 @@ namespace WichtelnWebapp.Server.Controllers
             await _db.SaveData(sqlCommand, new { ACCOUNT_ID = id, EMAIL = account.EMAIL, USERNAME = account.USERNAME, NAME = account.NAME, SURNAME = account.SURNAME});
         }
 
+
+        // Edit update password by id
+        // POST: api/Account/EditAccount/{id}
+        [HttpPost("EditPassword/{id}")]
+        public async Task EditPassword(int id, AccountModel account)
+        {
+            account.PASSWORD = HashPassword(account.PASSWORD);
+            string sqlCommand = @"UPDATE Account
+                                  SET PASSWORD = @PASSWORD
+                                  WHERE ACCOUNT_ID=@ACCOUNT_ID;";
+            await _db.SaveData(sqlCommand, new { ACCOUNT_ID = id, PASSWORD = account.PASSWORD});
+        }
+
         private string HashPassword(string password)
         {
             if (password == null)
             {
                 throw new ArgumentNullException("password");
             }
-            // Produce a version 0 (see comment above) password hash.
             byte[] salt;
             byte[] subkey;
             int SaltSize = 16;
@@ -142,11 +167,9 @@ namespace WichtelnWebapp.Server.Controllers
 
             byte[] hashedPasswordBytes = Convert.FromBase64String(hashedPassword);
 
-            // Verify a version 0 (see comment above) password hash.
 
             if (hashedPasswordBytes.Length != (1 + SaltSize + PBKDF2SubkeyLength) || hashedPasswordBytes[0] != 0x00)
             {
-                // Wrong length or version header.
                 return false;
             }
 

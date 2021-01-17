@@ -31,6 +31,15 @@
         <button type="submit" class="btn btn-primary">Update Account</button>
     </EditForm>
 </div>
+<div class="d-flex justify-content-center">
+    <EditForm Model="@accountModel" OnValidSubmit="@UpdatePassword">
+        <label for="password">New password</label>
+        <InputText type="password" class="form-control" @bind-Value="password_new" />
+        <label for="password">Confirm New password</label>
+        <InputText type="password" class="form-control" @bind-Value="password_confirm" />
+        <button type="submit" class="btn btn-primary">Update Password</button>
+    </EditForm>
+</div>
 
 
 @code {
@@ -38,6 +47,8 @@
     public int user_id { get; set; }
     private AccountModel accountModel = new AccountModel();
     String status;
+    public String password_new { get; set; }
+    public String password_confirm { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,6 +67,38 @@
         else
         {
             status = "An error occurred";
+        }
+        StateHasChanged();
+    }
+
+    private async void UpdatePassword()
+    {
+        if(password_confirm == "")
+        {
+            status = "Please confirm password";
+        }
+        else if(password_new == "")
+        {
+            status = "Please enter new password";
+        }
+        else if (password_confirm != password_new)
+        {
+            status = "Passwords do not Match";
+        }
+        else
+        {
+            accountModel.PASSWORD = password_new;
+            var request = await http.PostAsJsonAsync<AccountModel>("api/Account/EditPassword/" + user_id, accountModel);
+            if (request.IsSuccessStatusCode)
+            {
+                status = "Successfully updated account";
+                password_new = "";
+                password_confirm = "";
+            }
+            else
+            {
+                status = "An error occurred";
+            }
         }
         StateHasChanged();
     }

@@ -57,7 +57,7 @@
                             <h5>Comments</h5>
                             @foreach (var comm in comments)
                             {
-                    <p><strong>@comm.COMMENTER</strong> <small>at @comm.TIMESTAMP</small></p>
+                    <p><strong>@comm.COMMENTER</strong><small> at @comm.TIMESTAMP</small></p>
                                 <p>@comm.COMMENT</p>
                             }
 
@@ -103,6 +103,7 @@ else
         if (request.IsSuccessStatusCode)
         {
             getWishes(user_id);
+            comment.COMMENT = "";
         }
 
     }
