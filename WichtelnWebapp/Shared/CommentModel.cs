@@ -16,6 +16,7 @@ namespace WichtelnWebapp.Shared
         public string COMMENTER { get; set; }
 
         public string TIMESTAMP { get; set; }
+        public int COMMENT_ID { get; set; }
 
     }
 }

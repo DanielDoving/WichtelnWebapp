@@ -57,8 +57,20 @@
                             <h5>Comments</h5>
                             @foreach (var comm in comments)
                             {
-                    <p><strong>@comm.COMMENTER</strong><small> at @comm.TIMESTAMP</small></p>
-                                <p>@comm.COMMENT</p>
+                                <div class="w-100 border border-left-0 border-right-0 ">
+                                    <p><strong>@comm.COMMENTER</strong><small> at @comm.TIMESTAMP</small></p>
+                                    <p>
+                                        @comm.COMMENT
+                                        @if (comm.COMMENTER == acc.USERNAME)
+                                        {
+                                            <div class="pr-4 float-right">
+                                                <button type="button" class="btn-sm btn-danger" @onclick="@(()=> deleteComment(comm.COMMENT_ID))">
+                                                    <span class="oi oi-trash"></span>
+                                                </button>
+                                            </div>
+                                        }
+                                    </p>
+                                </div>
                             }
 
 
@@ -87,17 +99,18 @@ else
     public List<WishModel> wishes = new List<WishModel>();
     public List<CommentModel> comments = new List<CommentModel>();
     public CommentModel comment = new CommentModel();
+    public AccountModel acc = new AccountModel();
 
 
     protected override async Task OnInitializedAsync()
     {
         id = await sessionStorage.GetItemAsync<Int32>("ACCOUNT_ID");
         wishlists = await http.GetFromJsonAsync<List<AccountModel>>("api/WishList/GetAllBut/" + id);
+        acc = await http.GetFromJsonAsync<AccountModel>("api/Account/GetByID/" + id);
     }
 
     private async void HandleValidSubmit()
     {
-        AccountModel acc = await http.GetFromJsonAsync<AccountModel>("api/Account/GetByID/" + id);
         comment.COMMENTER = acc.USERNAME;
         var request = await http.PostAsJsonAsync<CommentModel>("api/WishList/AddComment/" + user_id, comment);
         if (request.IsSuccessStatusCode)
@@ -107,7 +120,6 @@ else
         }
 
     }
-
 
     async Task getWishes(int uid)
     {
@@ -127,6 +139,13 @@ else
             wish.GRANTED_BY = acc.USERNAME;
             StateHasChanged();
         }
+    }
+
+    async Task deleteComment(int comm_id)
+    {
+        await http.DeleteAsync("api/WishList/DeleteComment/" + comm_id);
+        comments = await http.GetFromJsonAsync<List<CommentModel>>("api/WishList/GetCommentByID/" + user_id);
+        StateHasChanged();
     }
 
 }

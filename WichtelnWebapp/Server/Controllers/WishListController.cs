@@ -24,7 +24,7 @@ namespace WichtelnWebapp.Server.Controllers
         [HttpGet("GetAll")]
         public Task<List<AccountModel>> GetAll()
         {
-            string sql = "select * from Wish WHERE Wish.TIMESTAMP >= cast(dateadd(day, -3, getdate()) as date);";
+            string sql = "select * from Wish WHERE Wish.TIMESTAMP >= cast(dateadd(day, -3, getdate()) as date) Wish.GRANTED = 1;";
 
             return _db.LoadData<AccountModel, dynamic>(sql, new { });
         }
@@ -36,7 +36,7 @@ namespace WichtelnWebapp.Server.Controllers
         {
             string sql = @"select distinct Account.ACCOUNT_ID, Account.USERNAME
                             from Account JOIN Wish on FK_ACCOUNT_ID=Account.ACCOUNT_ID 
-                            WHERE FK_ACCOUNT_ID!=@FK_ACCOUNT_ID AND Wish.TIMESTAMP >= cast(dateadd(day, -3, getdate()) as date);";
+                            WHERE FK_ACCOUNT_ID!=@FK_ACCOUNT_ID AND Wish.TIMESTAMP >= cast(dateadd(day, -3, getdate()) as date) or FK_ACCOUNT_ID!=@FK_ACCOUNT_ID and Wish.GRANTED = 1;";
             return _db.LoadData<AccountModel, dynamic>(sql, new { FK_ACCOUNT_ID = id });
         }
 
@@ -47,7 +47,7 @@ namespace WichtelnWebapp.Server.Controllers
         {
             string sql = @"SELECT WISH_ID, ITEM_TITLE, ITEM_DESCRIPTION, GRANTED, GRANTED_BY FROM Wish 
                             JOIN Account on Account.ACCOUNT_ID = Wish.FK_ACCOUNT_ID
-                            WHERE Account.ACCOUNT_ID = @ACCOUNT_ID AND Wish.TIMESTAMP >= cast(dateadd(day, -3, getdate()) as date);";
+                            WHERE Account.ACCOUNT_ID = @ACCOUNT_ID AND Wish.TIMESTAMP >= cast(dateadd(day, -3, getdate()) as date) or Wish.GRANTED = 1;";
             return _db.LoadData<WishModel, dynamic>(sql, new { ACCOUNT_ID = id });
 
         }
@@ -131,9 +131,19 @@ namespace WichtelnWebapp.Server.Controllers
         [HttpGet("GetCommentByID/{id}")]
         public Task<List<CommentModel>> GetCommentByID(int id)
         {
-            string sql = "select * from Comment WHERE FK_ACCOUNT_ID=@ACCOUNT_ID";
+            string sql = "select * from Comment WHERE FK_ACCOUNT_ID=@ACCOUNT_ID ORDER BY TIMESTAMP DESC;";
             return _db.LoadData<CommentModel, dynamic>(sql, new { ACCOUNT_ID = id });
         }
-       
+
+
+        // Delete Comment by id
+        // DELETE: api/WishList/Delete/{id}
+        [HttpDelete("DeleteComment/{id}")]
+        public async Task DeleteComment(int id)
+        {
+            string sqlCommand = "DELETE FROM Comment WHERE COMMENT_ID=@COMMENT_ID";
+            await _db.SaveData(sqlCommand, new { COMMENT_ID = id });
+        }
+
     }
 }
